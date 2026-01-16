@@ -15,6 +15,11 @@
         <template #title>仪表盘</template>
       </el-menu-item>
       
+      <el-menu-item index="/bots">
+        <el-icon><Connection /></el-icon>
+        <template #title>Bot 管理</template>
+      </el-menu-item>
+      
       <el-menu-item index="/trades">
         <el-icon><List /></el-icon>
         <template #title>交易管理</template>
@@ -61,7 +66,8 @@ import {
   Document, 
   Setting,
   Fold,
-  Expand
+  Expand,
+  Connection
 } from '@element-plus/icons-vue';
 
 const route = useRoute();

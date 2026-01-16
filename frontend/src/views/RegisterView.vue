@@ -1,15 +1,15 @@
 <template>
-  <div class="login-page">
-    <div class="login-card">
-      <h1 class="login-title">FreqTrade</h1>
-      <p class="login-subtitle">加密货币交易机器人</p>
+  <div class="register-page">
+    <div class="register-card">
+      <h1 class="register-title">FreqTrade</h1>
+      <p class="register-subtitle">创建新账户</p>
       
       <el-form 
         ref="formRef"
         :model="form" 
         :rules="rules"
-        @submit.prevent="handleLogin"
-        class="login-form"
+        @submit.prevent="handleRegister"
+        class="register-form"
       >
         <el-form-item prop="username">
           <el-input
@@ -31,15 +31,26 @@
           />
         </el-form-item>
         
+        <el-form-item prop="confirmPassword">
+          <el-input
+            v-model="form.confirmPassword"
+            type="password"
+            placeholder="确认密码"
+            size="large"
+            :prefix-icon="Lock"
+            show-password
+          />
+        </el-form-item>
+        
         <el-form-item>
           <el-button
             type="primary"
             size="large"
             :loading="isLoading"
             native-type="submit"
-            class="login-btn"
+            class="register-btn"
           >
-            登录
+            注册
           </el-button>
         </el-form-item>
       </el-form>
@@ -48,8 +59,8 @@
         {{ error }}
       </div>
       
-      <div class="register-link">
-        没有账户？<router-link to="/register">立即注册</router-link>
+      <div class="login-link">
+        已有账户？<router-link to="/login">立即登录</router-link>
       </div>
     </div>
   </div>
@@ -60,7 +71,7 @@ import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/userStore';
 import { User, Lock } from '@element-plus/icons-vue';
-import type { FormInstance, FormRules } from 'element-plus';
+import { ElMessage, type FormInstance, type FormRules } from 'element-plus';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -72,14 +83,33 @@ const error = ref('');
 const form = reactive({
   username: '',
   password: '',
+  confirmPassword: '',
 });
 
-const rules: FormRules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+const validateConfirmPassword = (_rule: unknown, value: string, callback: (error?: Error) => void) => {
+  if (value !== form.password) {
+    callback(new Error('两次输入的密码不一致'));
+  } else {
+    callback();
+  }
 };
 
-async function handleLogin() {
+const rules: FormRules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, message: '用户名至少 3 个字符', trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码至少 6 个字符', trigger: 'blur' },
+  ],
+  confirmPassword: [
+    { required: true, message: '请确认密码', trigger: 'blur' },
+    { validator: validateConfirmPassword, trigger: 'blur' },
+  ],
+};
+
+async function handleRegister() {
   if (!formRef.value) return;
   
   const valid = await formRef.value.validate().catch(() => false);
@@ -89,14 +119,15 @@ async function handleLogin() {
   error.value = '';
   
   try {
-    const result = await userStore.login(form.username, form.password);
+    const result = await userStore.register(form.username, form.password);
     if (result.success) {
-      router.push('/');
+      ElMessage.success('注册成功，请登录');
+      router.push('/login');
     } else {
-      error.value = result.error || '登录失败';
+      error.value = result.error || '注册失败';
     }
   } catch (err) {
-    error.value = '登录失败';
+    error.value = '注册失败';
   } finally {
     isLoading.value = false;
   }
@@ -104,7 +135,7 @@ async function handleLogin() {
 </script>
 
 <style scoped lang="scss">
-.login-page {
+.register-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -112,7 +143,7 @@ async function handleLogin() {
   background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
 }
 
-.login-card {
+.register-card {
   width: 100%;
   max-width: 400px;
   padding: 40px;
@@ -122,7 +153,7 @@ async function handleLogin() {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-.login-title {
+.register-title {
   font-size: 28px;
   font-weight: 700;
   color: var(--color-primary);
@@ -130,20 +161,20 @@ async function handleLogin() {
   margin-bottom: 8px;
 }
 
-.login-subtitle {
+.register-subtitle {
   font-size: 14px;
   color: var(--text-secondary);
   text-align: center;
   margin-bottom: 32px;
 }
 
-.login-form {
+.register-form {
   .el-form-item {
     margin-bottom: 20px;
   }
 }
 
-.login-btn {
+.register-btn {
   width: 100%;
 }
 
@@ -157,7 +188,7 @@ async function handleLogin() {
   font-size: 14px;
 }
 
-.register-link {
+.login-link {
   margin-top: 24px;
   text-align: center;
   font-size: 14px;

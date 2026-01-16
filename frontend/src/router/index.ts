@@ -1,11 +1,17 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
-import { useAuthStore } from '@/stores/authStore';
+import { useUserStore } from '@/stores/userStore';
 
 const routes: RouteRecordRaw[] = [
     {
         path: '/login',
         name: 'Login',
         component: () => import('@/views/LoginView.vue'),
+        meta: { requiresAuth: false },
+    },
+    {
+        path: '/register',
+        name: 'Register',
+        component: () => import('@/views/RegisterView.vue'),
         meta: { requiresAuth: false },
     },
     {
@@ -17,6 +23,11 @@ const routes: RouteRecordRaw[] = [
                 path: '',
                 name: 'Dashboard',
                 component: () => import('@/views/DashboardView.vue'),
+            },
+            {
+                path: 'bots',
+                name: 'BotManager',
+                component: () => import('@/views/BotManagerView.vue'),
             },
             {
                 path: 'trades',
@@ -48,12 +59,17 @@ const router = createRouter({
 });
 
 // Navigation guard
-router.beforeEach((to, _from, next) => {
-    const authStore = useAuthStore();
+router.beforeEach(async (to, _from, next) => {
+    const userStore = useUserStore();
 
-    if (to.meta.requiresAuth !== false && !authStore.isAuthenticated) {
+    // Try to restore session if not authenticated
+    if (!userStore.isAuthenticated) {
+        await userStore.restoreSession();
+    }
+
+    if (to.meta.requiresAuth !== false && !userStore.isAuthenticated) {
         next('/login');
-    } else if (to.path === '/login' && authStore.isAuthenticated) {
+    } else if ((to.path === '/login' || to.path === '/register') && userStore.isAuthenticated) {
         next('/');
     } else {
         next();
