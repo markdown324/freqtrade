@@ -62,7 +62,7 @@
       <el-tab-pane label="配置文件" name="configs">
         <div class="section-header">
           <h3>配置文件管理</h3>
-          <el-button type="primary" @click="showAddConfigDialog = true">
+          <el-button type="primary" @click="showConfigWizard = true">
             <el-icon><Plus /></el-icon>
             新建配置
           </el-button>
@@ -144,10 +144,16 @@
       </template>
     </el-dialog>
     
-    <!-- Add/Edit Config Dialog -->
+    <!-- Config Wizard -->
+    <ConfigWizard 
+      v-model="showConfigWizard"
+      @save="handleWizardSave"
+    />
+    
+    <!-- Edit Config Dialog (JSON only) -->
     <el-dialog 
-      v-model="showAddConfigDialog" 
-      :title="editingConfig ? '编辑配置' : '新建配置'"
+      v-model="showEditConfigDialog" 
+      title="编辑配置"
       width="800px"
     >
       <el-form 
@@ -170,9 +176,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="loadTemplate">加载模板</el-button>
-        <el-button @click="showAddConfigDialog = false">取消</el-button>
-        <el-button type="primary" @click="saveConfig">保存</el-button>
+        <el-button @click="showEditConfigDialog = false">取消</el-button>
+        <el-button type="primary" @click="updateConfig">保存</el-button>
       </template>
     </el-dialog>
   </div>
@@ -184,6 +189,7 @@ import { ElMessage, ElMessageBox, type FormInstance, type FormRules } from 'elem
 import { Plus } from '@element-plus/icons-vue';
 import { useUserStore } from '@/stores/userStore';
 import type { BotCredential, BotConfig } from '@/utils/storage';
+import ConfigWizard from '@/components/config/ConfigWizard.vue';
 import dayjs from 'dayjs';
 
 const userStore = useUserStore();
@@ -210,7 +216,8 @@ const botRules: FormRules = {
 };
 
 // Config Form
-const showAddConfigDialog = ref(false);
+const showConfigWizard = ref(false);
+const showEditConfigDialog = ref(false);
 const configFormRef = ref<FormInstance>();
 const editingConfig = ref<BotConfig | null>(null);
 
@@ -223,6 +230,16 @@ const configRules: FormRules = {
   name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
   configJson: [{ required: true, message: '请输入配置', trigger: 'blur' }],
 };
+
+// Handle wizard save
+async function handleWizardSave(name: string, config: Record<string, unknown>) {
+  try {
+    await userStore.addBotConfig(name, config);
+    ElMessage.success('配置创建成功');
+  } catch (error) {
+    ElMessage.error('保存失败');
+  }
+}
 
 // Bot Credential Actions
 function selectBot(id: string) {
@@ -294,10 +311,10 @@ function editConfig(config: BotConfig) {
   editingConfig.value = config;
   configForm.name = config.name;
   configForm.configJson = JSON.stringify(config.config, null, 2);
-  showAddConfigDialog.value = true;
+  showEditConfigDialog.value = true;
 }
 
-async function saveConfig() {
+async function updateConfig() {
   if (!configFormRef.value) return;
   
   const valid = await configFormRef.value.validate().catch(() => false);
@@ -309,12 +326,9 @@ async function saveConfig() {
     if (editingConfig.value) {
       await userStore.updateBotConfig(editingConfig.value.id, configForm.name, parsedConfig);
       ElMessage.success('更新成功');
-    } else {
-      await userStore.addBotConfig(configForm.name, parsedConfig);
-      ElMessage.success('创建成功');
     }
     
-    showAddConfigDialog.value = false;
+    showEditConfigDialog.value = false;
     resetConfigForm();
   } catch (error) {
     if (error instanceof SyntaxError) {
@@ -341,35 +355,13 @@ function resetConfigForm() {
   configForm.configJson = '';
 }
 
-function loadTemplate() {
-  configForm.configJson = JSON.stringify({
-    "max_open_trades": 3,
-    "stake_currency": "USDT",
-    "stake_amount": 30,
-    "dry_run": true,
-    "exchange": {
-      "name": "binance",
-      "key": "",
-      "secret": "",
-      "pair_whitelist": ["BTC/USDT", "ETH/USDT"]
-    },
-    "api_server": {
-      "enabled": true,
-      "listen_ip_address": "127.0.0.1",
-      "listen_port": 8080,
-      "username": "",
-      "password": ""
-    }
-  }, null, 2);
-}
-
 function formatDate(timestamp: number) {
   return dayjs(timestamp).format('YYYY-MM-DD HH:mm');
 }
 
 // Watch for dialog close to reset forms
 showAddBotDialog.value && resetBotForm();
-showAddConfigDialog.value && resetConfigForm();
+showEditConfigDialog.value && resetConfigForm();
 </script>
 
 <style scoped lang="scss">
