@@ -1,0 +1,209 @@
+@use 'sass:map';
+@use './variables.scss' as *;
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+#app {
+    height: 100%;
+}
+
+a {
+    color: var(--color-primary);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+
+    &:hover {
+        background: var(--text-muted);
+    }
+}
+
+// Utility classes
+.text-profit {
+    color: var(--profit-color) !important;
+}
+
+.text-loss {
+    color: var(--loss-color) !important;
+}
+
+.text-primary {
+    color: var(--color-primary) !important;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+// Mode indicator badges
+.mode-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+
+    &.dry-run {
+        background-color: rgba(63, 185, 80, 0.15);
+        color: var(--dry-run-color);
+    }
+
+    &.live {
+        background-color: rgba(248, 81, 73, 0.15);
+        color: var(--live-color);
+    }
+}
+
+// Card component
+.card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 16px;
+}
+
+// Stat card
+.stat-card {
+    @extend .card;
+
+    .stat-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 600;
+    }
+}
+
+// Element Plus dark theme overrides
+:root {
+    // Input
+    --el-input-bg-color: var(--bg-tertiary);
+    --el-input-border-color: var(--border-color);
+    --el-input-text-color: var(--text-primary);
+    --el-input-placeholder-color: var(--text-muted);
+    --el-input-hover-border-color: var(--color-primary);
+    --el-input-focus-border-color: var(--color-primary);
+
+    // Button
+    --el-button-bg-color: var(--bg-secondary);
+    --el-button-border-color: var(--border-color);
+    --el-button-text-color: var(--text-primary);
+    --el-button-hover-bg-color: var(--bg-tertiary);
+
+    // Menu
+    --el-menu-bg-color: var(--bg-secondary);
+    --el-menu-text-color: var(--text-secondary);
+    --el-menu-hover-bg-color: var(--bg-tertiary);
+    --el-menu-active-color: var(--color-primary);
+
+    // Table
+    --el-table-bg-color: var(--bg-secondary);
+    --el-table-tr-bg-color: var(--bg-secondary);
+    --el-table-header-bg-color: var(--bg-tertiary);
+    --el-table-border-color: var(--border-color);
+    --el-table-text-color: var(--text-primary);
+    --el-table-row-hover-bg-color: var(--bg-tertiary);
+
+    // Dropdown
+    --el-dropdown-menu-box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+
+    // Fill colors
+    --el-fill-color-blank: var(--bg-tertiary);
+    --el-fill-color-light: var(--bg-secondary);
+
+    // Border
+    --el-border-color: var(--border-color);
+    --el-border-color-light: var(--border-color);
+    --el-border-color-lighter: var(--border-color);
+
+    // Text
+    --el-text-color-primary: var(--text-primary);
+    --el-text-color-regular: var(--text-secondary);
+    --el-text-color-secondary: var(--text-muted);
+    --el-text-color-placeholder: var(--text-muted);
+
+    // Background
+    --el-bg-color: var(--bg-primary);
+    --el-bg-color-overlay: var(--bg-secondary);
+
+    // Mask
+    --el-mask-color: rgba(0, 0, 0, 0.6);
+}
+
+// Force input dark styling
+.el-input__wrapper {
+    background-color: var(--bg-tertiary) !important;
+    box-shadow: 0 0 0 1px var(--border-color) inset !important;
+
+    &:hover {
+        box-shadow: 0 0 0 1px var(--color-primary) inset !important;
+    }
+
+    &.is-focus {
+        box-shadow: 0 0 0 1px var(--color-primary) inset !important;
+    }
+}
+
+.el-input__inner {
+    color: var(--text-primary) !important;
+
+    &::placeholder {
+        color: var(--text-muted) !important;
+    }
+}
+
+.el-input__prefix,
+.el-input__suffix {
+    color: var(--text-muted) !important;
+}
+
+// Dropdown menu styling
+.el-dropdown-menu {
+    background-color: var(--bg-secondary) !important;
+    border-color: var(--border-color) !important;
+}
+
+.el-dropdown-menu__item {
+    color: var(--text-primary) !important;
+
+    &:hover {
+        background-color: var(--bg-tertiary) !important;
+    }
+}
